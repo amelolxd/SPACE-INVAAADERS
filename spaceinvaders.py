@@ -6,8 +6,18 @@ import sys
 import os
 pygame.init()
 
-sound1 = pygame.mixer.Sound('oh.mp3')
+sound1 = pygame.mixer.Sound('damagesound.wav')
 sound2 = pygame.mixer.Sound('sound1.wav')
+lasersound = pygame.mixer.Sound('laser sound.wav')
+pygame.mixer.music.load('main music.mp3')
+deadscreenmusic = pygame.mixer.Sound('deadscreenmusic.wav')
+winmusic = pygame.mixer.Sound('WIN.wav')
+pygame.mixer.music.set_volume(0.1)
+deadscreenmusic.set_volume(0.1)
+lasersound.set_volume(0.2)
+sound2.set_volume(0.2)
+winmusic.set_volume(0.04)
+sound1.set_volume(0.5)
 
 
 def load_image(name):
@@ -225,6 +235,7 @@ back = pygame.transform.scale(load_image('background.jpg'), (600, 600))
 
 font = pygame.font.Font('fontx.ttf', 35)
 text1 = font.render('PRESS ANY KEY TO START', True, 'WHITE')
+
 font2 = pygame.font.Font('fontx.ttf', 25)
 
 leveltext1 = font2.render('LEVEL 1', True, 'WHITE')
@@ -232,6 +243,7 @@ leveltext2 = font2.render('LEVEL 2', True, 'WHITE')
 
 
 def show_splash():
+    pygame.mixer.music.play(-1)
     # Показываем заставку
     running = True
     while running:
@@ -260,6 +272,9 @@ def show_splash():
 
 
 def play_level(level=1):
+    deadscreenmusic.stop()
+    winmusic.stop()
+    pygame.mixer.music.play(-1)
     star_state = 'stop'
     # running level 1
     if level == 1:
@@ -272,6 +287,7 @@ def play_level(level=1):
     while running:
         if len(heartsgroup) == 0:
             running = False
+            pygame.mixer.music.stop()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -284,6 +300,7 @@ def play_level(level=1):
                 elif event.key == pygame.K_SPACE:
                     laser = Laser(star.rect.x+22, star.rect.y+5)
                     lasergroup.add(laser)
+                    lasersound.play()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     star_state = 'stop'
@@ -339,6 +356,8 @@ def play_level(level=1):
 
 
 def show_dead_screen():
+    winmusic.stop()
+    pygame.mixer.music.stop()
     # заставка смерти
     fontxx = pygame.font.Font('fontx.ttf', 35)
     text3 = fontxx.render("YOU'RE DEAD!", True, 'RED')
@@ -350,7 +369,7 @@ def show_dead_screen():
                 exit()
             elif event.type == pygame.KEYDOWN:
                 return
-
+        deadscreenmusic.play(-1)
         screen.blit(back, (0, 0))
         screen.blit(text3, (160, 200))
         screen.blit(bones, (230, 250))
@@ -363,9 +382,11 @@ trophy = load_image('mystery.png')
 
 
 def winscreen():
+    pygame.mixer.music.stop()
+    deadscreenmusic.stop()
     fontxx = pygame.font.Font('fontx.ttf', 25)
     text3 = fontxx.render("You completed space invaders!", True, 'GREEN')
-    text6 = fontxx.render('PRESS ANY KEY TO PLAY AGAIN', True, 'GREEN')
+    text6 = fontxx.render('PRESS W TO PLAY AGAIN', True, 'GREEN')
     xpos = 200
     ypos = 250
 
@@ -375,11 +396,12 @@ def winscreen():
             if event.type == pygame.QUIT:
                 exit()
             elif event.type == pygame.KEYDOWN:
-                return
-
+                if event.key == pygame.K_w:
+                    return
+        winmusic.play(-1)
         screen.blit(back, (0, 0))
         screen.blit(text3, (60, 200))
-        screen.blit(text6, (60, 400))
+        screen.blit(text6, (120, 400))
         screen.blit(trophy, (xpos, ypos))
         pygame.display.update()
         clock.tick(FPS)
@@ -397,3 +419,4 @@ while True:
             deadscreen = False
     if deadscreen is True:
         show_dead_screen()
+        
